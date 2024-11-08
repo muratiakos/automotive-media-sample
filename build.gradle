@@ -16,7 +16,7 @@ buildscript {
 
         // testing framework versions
         junit_version = '4.13.2'
-        androidx_test_version = '1.4.0'
+        androidx_test_version = '1.6.1'
         mockito_version = '1.10.19'
     }
 
