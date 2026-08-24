@@ -39,7 +39,7 @@ class MusicService : MediaBrowserServiceCompat() {
         // Build a PendingIntent that can be used to launch the UI.
         val sessionActivityPendingIntent =
                 packageManager?.getLaunchIntentForPackage(packageName)?.let { sessionIntent ->
-                    PendingIntent.getActivity(this, 0, sessionIntent, 0)
+                    PendingIntent.getActivity(this, 0, sessionIntent, PendingIntent.FLAG_IMMUTABLE)
                 }
 
         mediaSession.setSessionActivity(sessionActivityPendingIntent)
