@@ -10,6 +10,7 @@ buildscript {
         androidx_media_version = '1.4.2'
         glide_version = '5.0.9'
         exoplayer_version = '2.15.1'
+        media3_version = '1.1.1'
 
         // Dependency injection
         koin_version = '3.1.2'

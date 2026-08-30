@@ -16,38 +16,42 @@
 package com.volvocars.mediasample.mediaplayback
 
 import android.content.Context
-import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaMetadataCompat
-import com.google.android.exoplayer2.MediaItem
+import androidx.core.net.toUri
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import com.volvocars.mediasample.R
 import com.volvocars.mediasample.domain.Song
 
 class MediaItemFactory(private val context: Context) {
-    fun createBrowsableRootMediaItem(rootId: String): MediaMetadataCompat =
-            MediaMetadataCompat.Builder().apply {
-                id = rootId
-                title = context.getString(R.string.browsable_tab_label)
-                flag = MediaBrowserCompat.MediaItem.FLAG_BROWSABLE
-            }.build()
+    fun createBrowsableRootMediaItem(rootId: String): MediaItem {
+        val metadata = MediaMetadata.Builder()
+            .setTitle(context.getString(R.string.browsable_tab_label))
+            .setIsBrowsable(true)
+            .setIsPlayable(false)
+            .build()
+        return MediaItem.Builder()
+            .setMediaId(rootId)
+            .setMediaMetadata(metadata)
+            .build()
+    }
 
-    fun createPlayableMediaItem(song: Song, playlistSize: Int, songNumber: Int): MediaMetadataCompat =
-            MediaMetadataCompat.Builder().apply {
-                id = song.id
-                title = song.title
-                mediaUri = song.mediaUri
-                artist = song.artist
-                albumArtUri = song.mediaArtUri
-                numberOfTracks = playlistSize.toLong()
-                trackNumber = songNumber.toLong()
-                flag = MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
-
-                displayTitle = song.title
-                displaySubtitle = song.subtitle
-                displayDescription = song.description
-                displayIconUri = song.mediaArtUri
-            }.build()
+    fun createPlayableMediaItem(song: Song, playlistSize: Int, songNumber: Int): MediaItem {
+        val metadata = MediaMetadata.Builder()
+            .setTitle(song.title)
+            .setArtist(song.artist)
+            .setArtworkUri(song.mediaArtUri.toUri())
+            .setIsBrowsable(false)
+            .setIsPlayable(true)
+            .setTrackNumber(songNumber)
+            .setTotalTrackCount(playlistSize)
+            .setDisplayTitle(song.title)
+            .setSubtitle(song.subtitle)
+            .setDescription(song.description)
+            .build()
+        return MediaItem.Builder()
+            .setMediaId(song.id)
+            .setUri(song.mediaUri)
+            .setMediaMetadata(metadata)
+            .build()
+    }
 }
-
-fun MediaMetadataCompat.toExoMediaItem() = MediaItem.Builder()
-        .setUri(mediaUri)
-        .build()

@@ -18,7 +18,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     buildTypes {
@@ -32,15 +32,15 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     namespace = "com.volvocars.mediasample"
 }
 
 val kotlin_version: String by rootProject.extra
 val glide_version: String by rootProject.extra
-val exoplayer_version: String by rootProject.extra
+val media3_version: String by rootProject.extra
 val koin_version: String by rootProject.extra
 val junit_version: String by rootProject.extra
 
@@ -54,10 +54,11 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:$glide_version")
     //kapt("com.github.bumptech.glide:compiler:$glide_version")
 
-    // Exo player
-    api("com.google.android.exoplayer:exoplayer-core:$exoplayer_version")
-    api("com.google.android.exoplayer:exoplayer-ui:$exoplayer_version")
-    api("com.google.android.exoplayer:extension-mediasession:$exoplayer_version")
+    // Media3
+    api("androidx.media3:media3-exoplayer:$media3_version")
+    api("androidx.media3:media3-ui:$media3_version")
+    api("androidx.media3:media3-common:$media3_version")
+    api("androidx.media3:media3-session:$media3_version")
 
     // DI
     implementation("io.insert-koin:koin-core:$koin_version")

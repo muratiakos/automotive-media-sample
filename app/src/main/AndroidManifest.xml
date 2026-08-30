@@ -33,6 +33,10 @@
         android:name="com.volvocars"
         android:required="true" />
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:name="com.volvocars.mediasample.MediaApplication"
         android:allowBackup="false"
@@ -58,9 +62,11 @@
         <service
             android:name="com.volvocars.mediasample.mediaplayback.MusicService"
             android:enabled="true"
+            android:foregroundServiceType="mediaPlayback"
             tools:ignore="ExportedService"
             android:exported="true">
             <intent-filter>
+                <action android:name="androidx.media3.session.MediaLibraryService"/>
                 <action android:name="android.media.browse.MediaBrowserService"/>
             </intent-filter>
         </service>

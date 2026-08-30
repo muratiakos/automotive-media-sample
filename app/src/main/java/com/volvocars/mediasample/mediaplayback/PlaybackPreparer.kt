@@ -15,59 +15,79 @@
  */
 package com.volvocars.mediasample.mediaplayback
 
-import android.net.Uri
 import android.os.Bundle
-import android.os.ResultReceiver
-import android.support.v4.media.session.PlaybackStateCompat
-import com.google.android.exoplayer2.ControlDispatcher
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
+import androidx.annotation.OptIn
+import androidx.media.utils.MediaConstants
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.LibraryResult
+import androidx.media3.session.MediaLibraryService.LibraryParams
+import androidx.media3.session.MediaLibraryService.MediaLibrarySession
+import androidx.media3.session.MediaSession
+import com.google.common.collect.ImmutableList
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
 import com.volvocars.mediasample.common.logging.logd
 import com.volvocars.mediasample.common.logging.loge
 
 class PlaybackPreparer(
-    private val player: Player,
     private val mediaLibrary: MediaLibrary
-) : MediaSessionConnector.PlaybackPreparer {
-    override fun onCommand(
-        player: Player,
-        controlDispatcher: ControlDispatcher,
-        command: String,
-        extras: Bundle?,
-        cb: ResultReceiver?
-    ) = false
+) : MediaLibrarySession.Callback {
 
-    override fun getSupportedPrepareActions() =
-            PlaybackStateCompat.ACTION_PREPARE_FROM_MEDIA_ID or
-            PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID or
-            PlaybackStateCompat.ACTION_PREPARE_FROM_SEARCH or
-            PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH
-
-    override fun onPrepare(playWhenReady: Boolean) {
-        logd("prepare - play: $playWhenReady")
-        player.playWhenReady = playWhenReady
-        player.stop()
-        player.prepare()
-    }
-
-    override fun onPrepareFromMediaId(mediaId: String, playWhenReady: Boolean, extras: Bundle?) {
-        val playableMedia = mediaLibrary.getSongById(mediaId)?.toExoMediaItem()
-        if (playableMedia == null) {
-            loge("Media not found.")
-            return
+    @OptIn(UnstableApi::class)
+    override fun onGetLibraryRoot(
+        session: MediaLibrarySession,
+        browser: MediaSession.ControllerInfo,
+        params: LibraryParams?
+    ): ListenableFuture<LibraryResult<MediaItem>> {
+        val rootExtras = params?.extras ?: Bundle()
+        rootExtras.apply {
+            putInt(
+                MediaConstants.DESCRIPTION_EXTRAS_KEY_CONTENT_STYLE_BROWSABLE,
+                MediaConstants.DESCRIPTION_EXTRAS_VALUE_CONTENT_STYLE_GRID_ITEM
+            )
+            putInt(
+                MediaConstants.DESCRIPTION_EXTRAS_KEY_CONTENT_STYLE_PLAYABLE,
+                MediaConstants.DESCRIPTION_EXTRAS_VALUE_CONTENT_STYLE_GRID_ITEM
+            )
         }
-        logd(playableMedia.mediaMetadata.title.toString())
-        player.playWhenReady = playWhenReady
-        player.stop()
-        player.setMediaItem(playableMedia)
-        player.prepare()
+        val libraryParams = LibraryParams.Builder().setExtras(rootExtras).build()
+        val rootMetadata = MediaMetadata.Builder()
+            .setIsBrowsable(true)
+            .setIsPlayable(false)
+            .build()
+        val rootItem = MediaItem.Builder()
+            .setMediaId(BROWSABLE_ROOT_ID)
+            .setMediaMetadata(rootMetadata)
+            .build()
+        return Futures.immediateFuture(LibraryResult.ofItem(rootItem, libraryParams))
     }
 
-    override fun onPrepareFromSearch(query: String, playWhenReady: Boolean, extras: Bundle?) {
-        onPrepare(playWhenReady)
+    override fun onGetChildren(
+        session: MediaLibrarySession,
+        browser: MediaSession.ControllerInfo,
+        parentId: String,
+        page: Int,
+        pageSize: Int,
+        params: LibraryParams?
+    ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
+        val children = mediaLibrary.getPlaylistById(parentId) ?: emptyList()
+        return Futures.immediateFuture(LibraryResult.ofItemList(ImmutableList.copyOf(children), params))
     }
 
-    override fun onPrepareFromUri(uri: Uri, playWhenReady: Boolean, extras: Bundle?) {
-        onPrepare(playWhenReady)
+    override fun onAddMediaItems(
+        mediaSession: MediaSession,
+        controller: MediaSession.ControllerInfo,
+        mediaItems: MutableList<MediaItem>
+    ): ListenableFuture<MutableList<MediaItem>> {
+        val updatedMediaItems = mediaItems.map { mediaItem ->
+            if (mediaItem.mediaId != MediaItem.DEFAULT_MEDIA_ID && mediaItem.requestMetadata.mediaUri == null) {
+                mediaLibrary.getSongById(mediaItem.mediaId) ?: mediaItem
+            } else {
+                mediaItem
+            }
+        }.toMutableList()
+        return Futures.immediateFuture(updatedMediaItems)
     }
 }
