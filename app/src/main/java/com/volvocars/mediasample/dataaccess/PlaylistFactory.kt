@@ -41,6 +41,15 @@ class PlaylistFactory(
             mediaArtUri = resourceUriUtil.getUriFor(R.drawable.abba_album_art).toString(),
             mediaUri = resourceUriUtil.getUriFor(R.raw.test_audio_track).toString(),
             artist = context.getString(R.string.sample_artist_name),
-        )
+        ),
+            Song(
+                    id = "premier_song_id",
+                    title = "2" + context.getString(R.string.sample_song_title),
+                    subtitle = context.getString(R.string.sample_song_subtitle),
+                    description = context.getString(R.string.sample_song_description),
+                    mediaArtUri = resourceUriUtil.getUriFor(R.drawable.abba_album_art).toString(),
+                    mediaUri = resourceUriUtil.getUriFor(R.raw.test_audio_track).toString(),
+                    artist = context.getString(R.string.sample_artist_name),
+            )
     )
 }

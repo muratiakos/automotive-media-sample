@@ -15,7 +15,7 @@
  */
 package com.volvocars.mediasample.mediaplayback
 
-import android.support.v4.media.MediaMetadataCompat
+import androidx.media3.common.MediaItem
 import com.volvocars.mediasample.common.logging.logd
 import com.volvocars.mediasample.domain.Playlist
 import com.volvocars.mediasample.domain.SongRepository
@@ -30,7 +30,7 @@ import com.volvocars.mediasample.domain.SongRepository
  */
 class MediaLibrary(mediaItemFactory: MediaItemFactory, songRepository: SongRepository) {
     private val playlist: Playlist = songRepository.retrievePlaylist()
-    private val library = mutableMapOf<String, List<MediaMetadataCompat>>()
+    private val library = mutableMapOf<String, List<MediaItem>>()
 
     init {
         library[BROWSABLE_ROOT_ID] = listOf(
@@ -45,13 +45,13 @@ class MediaLibrary(mediaItemFactory: MediaItemFactory, songRepository: SongRepos
         }
     }
 
-    fun getPlaylistById(id: String): List<MediaMetadataCompat>? {
+    fun getPlaylistById(id: String): List<MediaItem>? {
         logd("need $id")
         return library[id]
     }
 
-    fun getSongById(id: String): MediaMetadataCompat? {
-        return library[playlist.id]?.find { it.id == id }
+    fun getSongById(id: String): MediaItem? {
+        return library[playlist.id]?.find { it.mediaId == id }
     }
 }
 
